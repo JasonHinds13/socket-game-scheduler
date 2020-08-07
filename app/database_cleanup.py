@@ -20,7 +20,6 @@ def deactivate_rooms():
 
     app.logger.debug('starting deactivation check. Room back-off -> {}, Player inactivity -> {}'.format(5, 5))
 
-    # TODO: Take date into consideration for back-off time
     rooms_to_check = Rooms.query.filter(Rooms.last_activity_check <= str(back_off_time), Rooms.is_active == 'True').all()
 
     for room in rooms_to_check:
@@ -52,7 +51,6 @@ def remove_inactive_rooms():
 
     app.logger.debug('getting inactive rooms')
 
-    # TODO: Take date into consideration for back-off time
     rooms_to_remove = Rooms.query.filter(Rooms.last_activity_check <= str(back_off_time), Rooms.is_active == 'False').all()
 
     for room in rooms_to_remove:
@@ -61,13 +59,16 @@ def remove_inactive_rooms():
         delete_players_statement = Persons.__table__.delete().where(Persons.current_room == room.room_id)
         delete_rounds_statement = Rounds.__table__.delete().where(Rounds.room_id == room.room_id)
 
-        db.session.execute(delete_card_history_statement)
-        db.session.execute(delete_players_statement)
-        db.session.execute(delete_rounds_statement)
-        db.session.delete(room)
-        app.logger.debug('removed room data for room -> {}'.format(room.room_id))
-
-    db.session.commit()
+        try:
+            db.session.execute(delete_card_history_statement)
+            db.session.execute(delete_players_statement)
+            db.session.execute(delete_rounds_statement)
+            db.session.delete(room)
+            db.session.commit()
+            app.logger.debug('removed room data for room -> {}'.format(room.room_id))
+        except SQLAlchemyError as e:
+            app.logger.warn('DB error: {}'.format(str(e)))
+            db.session.rollback()
 
     if len(rooms_to_remove) > 0:
         app.logger.debug('room data removal committed')
