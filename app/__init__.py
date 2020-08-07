@@ -13,6 +13,7 @@ app.config['SCHEDULER_ROOM_DEACTIVATION'] = getenv("SCHEDULER_ROOM_DEACTIVATION"
 app.config['SCHEDULER_ROOM_DELETION'] = getenv("SCHEDULER_ROOM_DELETION")
 log_level = getenv("ROOT_LOG_LEVEL")
 default_format = getenv('DEFAULT_FORMAT')
+log_path = getenv("LOGGING_FILE_PATH")
 
 # Configure app logger
 dictConfig({
@@ -30,10 +31,20 @@ dictConfig({
         'stream': 'ext://flask.logging.wsgi_errors_stream',
         'formatter': 'default',
         'filters': ['default_filter']
-    }},
+    },
+        'file': {
+        'class': 'logging.handlers.TimedRotatingFileHandler',
+        'filename': log_path,
+        'formatter': 'default',
+        'utc': 'True',
+        'interval': 1,
+        'backupCount': 5,
+        'filters': ['default_filter']
+        }
+    },
     'root': {
         'level': log_level,
-        'handlers': ['wsgi']
+        'handlers': ['wsgi', 'file']
     }
 })
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True  # added just to suppress a warning
