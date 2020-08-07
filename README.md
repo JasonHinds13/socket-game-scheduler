@@ -10,6 +10,7 @@ This application uses environment variables for configuration. A list of config 
 * `ROOM_BACK_OFF`:  Back-off period in minute for checking if a room is active. 
 * `PLAYER_INACTIVITY`: Number of minutes all users in a room should be inactive for before deactivating the room
 * `SCHEDULER_ROOM_DEACTIVATION`: Interval in minutes between room inactivity check firing
+* `LOGGING_FILE_PATH`: Log file path
 
 ## Startup Commands
 * `virtualenv venv` (Optional)  
